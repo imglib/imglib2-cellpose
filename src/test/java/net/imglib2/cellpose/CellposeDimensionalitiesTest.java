@@ -602,6 +602,7 @@ public class CellposeDimensionalitiesTest
 	{
 		final String thresholdValue = System.getenv( "TEST_THRESHOLD" );
 		final int threshold = thresholdValue == null ? 0 : Integer.parseInt( thresholdValue );
+		//final int threshold = 1000;
 		assumeTrue( threshold >= minimum );
   }
 
