@@ -91,12 +91,19 @@ def run_cellpose_v3(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     time_axis = kwargs.get('time_axis', None)
     stitch_threshold=kwargs.get('stitch_threshold', 0.)
     do_3D=kwargs.get('use_3D', False)
+    label_unicity = kwargs.get('label_unicity', None)
 
     if time_axis is not None and z_axis is None:
         # The only way to process T axis in batch is to fake it as a Z-axis and prevent stitching.
         z_axis = time_axis
         stitch_threshold = 0. # force no stitching
         do_3D = False # force 2D processing
+        
+    # Force label unicity accross slices if 2D+stitch and stitch_threshold is 0, except if label_unicity is already set to False
+    if not do_3D and z_axis is not None and stitch_threshold == 0.:
+        z_axis = None
+        if label_unicity is None:
+            label_unicity = True
     
     masks, flows, styles = model.eval(
         img,
@@ -116,6 +123,18 @@ def run_cellpose_v3(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
         niter=kwargs.get( 'niter', None ),
         tile_overlap=kwargs.get('tile_overlap', 0.1),
     )
+           
+    ## force label_unicity if necessary
+    if label_unicity:
+        task.update(message=f"Ensuring label unicity accross slices/frames..")
+        masks = np.asarray(masks)
+        nz = masks.shape[0]
+        max_per_z = masks.reshape(nz, -1).max(axis=1)
+        ## Calculate the offsets for each slice
+        offsets = np.concatenate(([0], np.cumsum(max_per_z)[:-1]))
+        offsets = offsets.reshape((nz,) + (1,) * (masks.ndim - 1))
+        ## Offset only positive pixels (labels) 
+        masks = np.where(masks > 0, masks + offsets, masks)
     return masks, flows, styles
 
 
@@ -153,6 +172,7 @@ if appose_mode:
     anisotropy: float = globals()['anisotropy']
     niter: int | None = globals()['niter']
     use_gpu: bool = globals()['use_gpu']
+    label_unicity: bool | None = globals()['label_unicity']
 
     input_image = fiji_image.ndarray()
     output_labels = fiji_output_labels.ndarray()
@@ -191,6 +211,7 @@ else:
     flow3D_smooth = 0
     niter = None
     use_gpu = False
+    label_unicity = None
 
 use_gpu, device = get_torch_device(use_gpu)
 task.update(
@@ -225,6 +246,7 @@ masks, flows, styles = run_cellpose_v3(
         'min_size': min_size,
         'tile_overlap': tile_overlap,
         'niter': niter,
+        'label_unicity': label_unicity,
     }
 )
 

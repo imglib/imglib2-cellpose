@@ -59,7 +59,8 @@ public class BasicUsage
 
 	public static void main( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		basicUsage( args );
+		//basicUsage( args );
+		stitchThreshold( args );
 //		outputType( args );
 //		cellposeRunner( args );
 	}
@@ -123,6 +124,38 @@ public class BasicUsage
 		ImageJFunctions.show( flows ).setTitle( "Cellpose flows" );
 	}
 
+	public static < T extends RealType< T > & NativeType< T > > void stitchThreshold( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		// Demo preparation. We use IJ for this one.
+		ImageJ.main( args );
+		//final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
+		final ImagePlus imp = IJ.openImage( "../data_tests/041825_crop-small.tif" );
+		
+		imp.show();
+		final Img< T > img = ImageJFunctions.wrap( imp );
+
+		// Input
+		final RandomAccessibleInterval< T > input = img;
+		// You need to specify the dimensionality of your input
+		final AxisInfo inputAxes = AxisInfo.XYZ;
+
+		// Get messages about installing and processing
+		final ApposeTaskListener listener = ApposeTaskListener.STD;
+
+		// Specify the parameters for Cellpose 3
+		final Cellpose3Parameters params = Cellpose3Parameters.builder()
+		    .do3D( false )
+		    .stitchThreshold(0.)
+		    .computeFlows( false )
+		    .build();
+
+		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );
+
+		final RandomAccessibleInterval< UnsignedShortType > labels = output.labels;
+
+		ImageJFunctions.show( labels ).setTitle( "Cellpose output" );
+	}
+	
 	public static void cellposeRunner( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		// Create fake images. Replace by your own images here.
