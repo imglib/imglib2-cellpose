@@ -33,6 +33,7 @@
 package net.imglib2.cellpose;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,8 +60,8 @@ public class BasicUsage
 
 	public static void main( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		//basicUsage( args );
-		stitchThreshold( args );
+		basicUsage( args );
+		//stitchThreshold( args );
 //		outputType( args );
 //		cellposeRunner( args );
 	}
@@ -128,8 +129,8 @@ public class BasicUsage
 	{
 		// Demo preparation. We use IJ for this one.
 		ImageJ.main( args );
-		//final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
-		final ImagePlus imp = IJ.openImage( "../data_tests/041825_crop-small.tif" );
+		final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
+		//final ImagePlus imp = IJ.openImage( "../data_tests/041825_crop-small.tif" );
 		
 		imp.show();
 		final Img< T > img = ImageJFunctions.wrap( imp );

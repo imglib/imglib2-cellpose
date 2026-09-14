@@ -63,8 +63,8 @@ public class EnvironmentTest
 				.channels( 0, 0 )
 				.build();
 			final String envName = "cp3-cpu";
-			final String pythonScriptPath = "/cp3.py";
-			final String pythonInitScriptPath = "/cp3_init.py";
+			final String pythonScriptPath = "cp3.py";
+			final String pythonInitScriptPath = "cp3_init.py";
 		
 			final CellposeRunner<UnsignedByteType, UnsignedByteType> cprun = new CellposeRunner<>(
 					params,
@@ -103,8 +103,8 @@ public class EnvironmentTest
 				.computeFlows( false )
 				.build();
 			final String envName = "cp4-cpu";
-			final String pythonScriptPath = "/cp4.py";
-			final String pythonInitScriptPath = "/cp4_init.py";
+			final String pythonScriptPath = "cp4.py";
+			final String pythonInitScriptPath = "cp4_init.py";
 		
 			final CellposeRunner<UnsignedByteType, UnsignedByteType> cprun = new CellposeRunner<>(
 					params,
