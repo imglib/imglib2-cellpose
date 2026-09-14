@@ -70,13 +70,14 @@ public class Cellpose4Parameters extends CellposeParameters
 			final boolean computeFlows,
 			final int flow3dSmooth,
 			final int nIter,
-			final String torchVersion)
+			final String torchVersion,
+			final Boolean labelUnicity)
 	{
 		super(
 				customModel, diameter, do3D, normalize, flowThreshold,
 				cellProbThreshold, useGpu, minSize, anisotropy,
 				stitchThreshold, resample, tileOverlap, computeFlows,
-				flow3dSmooth, nIter, torchVersion );
+				flow3dSmooth, nIter, torchVersion, labelUnicity );
 		this.buitInModel = buitInModel;
 		this.chan0 = chan0;
 		this.chan1 = chan1;
@@ -151,7 +152,7 @@ public class Cellpose4Parameters extends CellposeParameters
 					model, chan0, chan1, chan2, customModel, diameter, do3D, normalize,
 					flowThreshold, cellProbThreshold, useGpu, minSize,
 					anisotropy, stitchThreshold, resample, tileOverlap,
-					computeFlows, flow3dSmooth, nIter, torchVersion );
+					computeFlows, flow3dSmooth, nIter, torchVersion, labelUnicity );
 		}
 	}
 

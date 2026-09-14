@@ -87,7 +87,10 @@ public abstract class CellposeParameters
 	public final int nIter;
 
 	public final String torchVersion;
-
+	
+	// To force label unicity (or not) accross slices or frames. If null, python script decides: unicity only if 2D+stitch and stitch=0
+	public final Boolean labelUnicity;
+	
 	protected CellposeParameters(
 			final String customModel,
 			final double diameter,
@@ -104,7 +107,8 @@ public abstract class CellposeParameters
 			final boolean computeFlows,
 			final int flow3dSmooth,
 			final int nIter,
-			final String torchVersion )
+			final String torchVersion,
+			final Boolean labelUnicity )
 	{
 		this.customModel = customModel;
 		this.diameter = diameter;
@@ -122,6 +126,7 @@ public abstract class CellposeParameters
 		this.flow3dSmooth = flow3dSmooth;
 		this.nIter = nIter;
 		this.torchVersion = torchVersion;
+		this.labelUnicity = labelUnicity;
 	}
 
 	/**
@@ -171,7 +176,8 @@ public abstract class CellposeParameters
 		inputs.put( "flow3D_smooth", flow3dSmooth );
 		inputs.put( "niter", nIter <= 0 ? null : nIter );
 		inputs.put( "use_gpu", useGpu );
-
+		inputs.put( "label_unicity", labelUnicity == null ? null: labelUnicity );
+		
 		return inputs;
 	}
 
@@ -222,6 +228,8 @@ public abstract class CellposeParameters
 
 		protected String torchVersion = "cpu";
 
+		protected Boolean labelUnicity = null; // when null, nothing is imposed to python. True or false to impose unicity or not
+
 		@SuppressWarnings( "unchecked" )
 		public B customModel( final String customModel )
 		{
@@ -268,6 +276,13 @@ public abstract class CellposeParameters
 		public B useGpu( final boolean useGpu )
 		{
 			this.useGpu = useGpu;
+			return ( B ) this;
+		}
+		
+		@SuppressWarnings( "unchecked" )
+		public B labelUnicity( final boolean labelUnicity )
+		{
+			this.labelUnicity  = labelUnicity;
 			return ( B ) this;
 		}
 

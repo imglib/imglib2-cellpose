@@ -30,6 +30,7 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # #L%
 ###
+
 import numpy as np
 from cellpose import models, io
 from typing import TYPE_CHECKING
@@ -81,6 +82,7 @@ def run_cellpose_v4(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     time_axis = kwargs.get('time_axis', None)
     stitch_threshold=kwargs.get('stitch_threshold', 0.)
     do_3D=kwargs.get('use_3D', False)
+    label_unicity = kwargs.get('label_unicity', None)
 
     task.update(message=f"Received image with shape {img.shape} and parameters: channel_axis={channel_axis}, z_axis={z_axis}, time_axis={time_axis}, stitch_threshold={stitch_threshold}, use_3D={do_3D}")
 
@@ -106,8 +108,11 @@ def run_cellpose_v4(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     # Another special case. If we have a Z stack, but stitch_threshold= 0., cellpose will
     # complain that the z_axis should be None to process a batch of 2D planes. We abide.
     # But then we must also check that we have a channel image.
+    # Force label unicity accross slices in that case, except if label_unicity is already set to False
     if not do_3D and z_axis is not None and stitch_threshold == 0.:
         z_axis = None
+        if label_unicity is None:
+            label_unicity = True
         if channel_axis is None:
             img = np.expand_dims(img, axis=-1)
         else:
@@ -138,14 +143,24 @@ def run_cellpose_v4(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     )
 
     task.update(message=f"Model evaluation completed. Masks shape: {masks.shape}, Flows shape: {flows[0].shape}, Styles shape: {styles.shape}")
-
+    
+    ## force label_unicity if necessary
+    if label_unicity:
+        task.update(message=f"Ensuring label unicity accross slices/frames..")
+        masks = np.asarray(masks)
+        nz = masks.shape[0]
+        max_per_z = masks.reshape(nz, -1).max(axis=1)
+        ## Calculate the offsets for each slice
+        offsets = np.concatenate(([0], np.cumsum(max_per_z)[:-1]))
+        offsets = offsets.reshape((nz,) + (1,) * (masks.ndim - 1))
+        ## Offset only positive pixels (labels) 
+        masks = np.where(masks > 0, masks + offsets, masks)
     return masks, flows, styles
 
 
 ###############################################################################
 # MAIN PROGRAM
 ###############################################################################
-
 
 
 appose_mode = 'task' in globals()
@@ -184,6 +199,7 @@ if appose_mode:
     flow3D_smooth: float = globals()['flow3D_smooth']
     n_channels: int = globals()['n_channels']    
     use_gpu: bool = globals()['use_gpu']
+    label_unicity: bool | None = globals()['label_unicity']
 
     
     input_image = fiji_image.ndarray()  # pylint: disable=E1120
@@ -230,6 +246,8 @@ else:
     tile_overlap = 0.1
     flow3D_smooth = 0
     use_gpu = False
+    label_unicity = None
+
 
 use_gpu, device = get_torch_device(use_gpu)
 task.update(
@@ -258,6 +276,7 @@ masks, flows, styles = run_cellpose_v4(
         'min_size': min_size,
         'niter': niter,
         'tile_overlap': tile_overlap,
+        'label_unicity': label_unicity,
     }
 )
 

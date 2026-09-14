@@ -67,14 +67,15 @@ public class Cellpose3Parameters extends CellposeParameters
 			final boolean computeFlows,
 			final int flow3dSmooth,
 			final int nIter,
-			final String torchVersion
+			final String torchVersion,
+			final Boolean labelUnicity
 		)
 	{
 		super(
 				customModel, diameter, do3D, normalize, flowThreshold,
 				cellProbThreshold, useGpu, minSize, anisotropy,
 				stitchThreshold, resample, tileOverlap, computeFlows,
-				flow3dSmooth, nIter, torchVersion );
+				flow3dSmooth, nIter, torchVersion, labelUnicity );
 		this.buitInModel = buitInModel;
 		this.channels = channels;
 	}
@@ -138,7 +139,7 @@ public class Cellpose3Parameters extends CellposeParameters
 					model, channels, customModel, diameter, do3D, normalize,
 					flowThreshold, cellProbThreshold, useGpu, minSize,
 					anisotropy, stitchThreshold, resample, tileOverlap,
-					computeFlows, flow3dSmooth, nIter, torchVersion );
+					computeFlows, flow3dSmooth, nIter, torchVersion, labelUnicity );
 		}
 	}
 
