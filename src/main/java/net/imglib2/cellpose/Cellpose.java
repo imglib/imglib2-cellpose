@@ -436,8 +436,8 @@ public class Cellpose
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
-		final String pythonScriptPath = "/cp3.py";
-		final String pythonInitScriptPath = "/cp3_init.py";
+		final String pythonScriptPath = "cp3.py";
+		final String pythonInitScriptPath = "cp3_init.py";
 		return run( img, axisInfo, outputType, params, pythonInitScriptPath, pythonScriptPath, envName, listener );
 	}
 
@@ -507,8 +507,8 @@ public class Cellpose
 			final ShmImg< UnsignedByteType > outputFlows ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		final String envName = "cp3-" + getTorchInstallSuffix( params.torchVersion );
-		final String pythonScriptPath = "/cp3.py";
-		final String pythonInitScriptPath = "/cp3_init.py";
+		final String pythonScriptPath = "cp3.py";
+		final String pythonInitScriptPath = "cp3_init.py";
 		
 		return new CellposeRunner<>(
 				params,
@@ -588,8 +588,8 @@ public class Cellpose
 			final ShmImg< UnsignedByteType > outputFlows ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		final String envName = "cp4-" + getTorchInstallSuffix( params.torchVersion );
-		final String pythonScriptPath = "/cp4.py";
-		final String pythonInitScriptPath = "/cp4_init.py";
+		final String pythonScriptPath = "cp4.py";
+		final String pythonInitScriptPath = "cp4_init.py";
 		return new CellposeRunner<>(
 				params,
 				pythonInitScriptPath,
@@ -689,8 +689,8 @@ public class Cellpose
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		final String envName = "cp4-" + getTorchInstallSuffix( params.torchVersion );
-		final String pythonScriptPath = "/cp4.py";
-		final String pythonInitScriptPath = "/cp4_init.py";
+		final String pythonScriptPath = "cp4.py";
+		final String pythonInitScriptPath = "cp4_init.py";
 		
 		return run( img, axisInfo, outputType, params, pythonInitScriptPath, pythonScriptPath, envName, listener );
 	}

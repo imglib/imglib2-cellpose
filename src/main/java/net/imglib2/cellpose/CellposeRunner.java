@@ -174,7 +174,7 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 	{
 		// Python env. specifications.
 		final String cellposeEnv = pixiEnv();
-
+		
 		// Create Python env.
 		final Environment env = Appose
 				.pixi()
@@ -183,7 +183,7 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 				.subscribeOutput( listener.outputListener() )
 				.subscribeError( listener.errorListener() )
 				.build();
-		final String utilsScript = IOUtils.toString( Cellpose.class.getResource( "/cp_utils.py" ), StandardCharsets.UTF_8 );
+		final String utilsScript = IOUtils.toString( Cellpose.class.getResource( "cp_utils.py" ), StandardCharsets.UTF_8 );
 		final Environment activate = env.activate(envName);
 		this.python = activate.python().init( utilsScript );
 
@@ -222,7 +222,7 @@ public class CellposeRunner< T extends RealType< T > & NativeType< T >, R extend
 	 */
 	public static String pixiEnv() throws IOException
 	{
-		final URL pixiFile = CellposeRunner.class.getResource( "/pixi.toml" );
+		final URL pixiFile = Cellpose.class.getResource( "pixi.toml" );
 		final String env = IOUtils.toString( pixiFile, StandardCharsets.UTF_8 );
 		return env;
 	}
