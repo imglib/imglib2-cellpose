@@ -332,7 +332,7 @@ public class Cellpose
 		runner.init();
 		if ( nt > 1 && nz > 1 )
 		{
-			final CellposeRunnerWrapper wrapper = new CellposeRunnerWrapper( runner, d -> {} );
+			final CellposeRunnerWrapper< CP > wrapper = new CellposeRunnerWrapper<>( runner, d -> {} );
 			return wrapper.run( input, axisInfo, outputType, params );
 		}
 		else

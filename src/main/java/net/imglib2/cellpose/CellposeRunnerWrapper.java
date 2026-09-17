@@ -25,14 +25,14 @@ import net.imglib2.view.Views;
  *
  * @author Jean-Yves Tinevez
  */
-public class CellposeRunnerWrapper
+public class CellposeRunnerWrapper< CP extends CellposeParameters >
 {
 
-	private final CellposeRunner runner;
+	private final CellposeRunner< CP > runner;
 
 	private final DoubleConsumer progressListener;
 
-	public CellposeRunnerWrapper( final CellposeRunner runner, final DoubleConsumer progressListener )
+	public CellposeRunnerWrapper( final CellposeRunner< CP > runner, final DoubleConsumer progressListener )
 	{
 		this.runner = runner;
 		this.progressListener = progressListener;
@@ -42,7 +42,7 @@ public class CellposeRunnerWrapper
 			final RandomAccessibleInterval< T > input,
 			final AxisInfo axisInfo,
 			final R outputType,
-			final CellposeParameters params ) throws InterruptedException, TaskException
+			final CP params ) throws InterruptedException, TaskException
 	{
 		if ( axisInfo.T() < 0 )
 			throw new IllegalArgumentException( "This wrapper process timepoints sequentially, so the input must have a time axis." );
