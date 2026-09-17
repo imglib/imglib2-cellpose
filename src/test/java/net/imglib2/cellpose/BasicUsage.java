@@ -43,7 +43,6 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.appose.ShmImg;
 import net.imglib2.appose.util.ApposeTaskListener;
 import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.img.Img;
@@ -54,17 +53,24 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.util.ImgUtil;
 
 public class BasicUsage
 {
 
 	public static void main( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		//basicUsage( args );
-		stitchThreshold( args );
-//		outputType( args );
-//		cellposeRunner( args );
+		try
+		{
+			basicUsage( args );
+//			basicUsageCP4( args );
+//			stitchThreshold( args );
+//			outputType( args );
+//			cellposeRunner( args );
+		}
+		catch ( final Exception e )
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public static < T extends RealType< T > & NativeType< T > > void outputType( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
@@ -112,13 +118,44 @@ public class BasicUsage
 
 		// Specify the parameters for Cellpose 3
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
-		    .model( Cellpose3BuiltinModels.CYTO2 )
-		    .channels( 1, 0 )
-		    .computeFlows( true )
-		    .randomizeLabels(true)
-		    .build();
+				.model( Cellpose3BuiltinModels.CYTO2 )
+				.channels( 1, 0 )
+				.computeFlows( true )
+				.randomizeLabels( true )
+				.build();
 
 		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );
+
+		final RandomAccessibleInterval< UnsignedShortType > labels = output.labels;
+		final RandomAccessibleInterval< UnsignedByteType > flows = output.flows;
+
+		ImageJFunctions.show( labels ).setTitle( "Cellpose output" );
+		ImageJFunctions.show( flows ).setTitle( "Cellpose flows" );
+	}
+
+	public static < T extends RealType< T > & NativeType< T > > void basicUsageCP4( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		// Demo preparation. We use IJ for this one.
+		ImageJ.main( args );
+		final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
+		imp.show();
+		final Img< T > img = ImageJFunctions.wrap( imp );
+
+		// Input
+		final RandomAccessibleInterval< T > input = img;
+		// You need to specify the dimensionality of your input
+		final AxisInfo inputAxes = AxisInfo.XY;
+
+		// Get messages about installing and processing
+		final ApposeTaskListener listener = ApposeTaskListener.STD;
+
+		// Specify the parameters for Cellpose 3
+		final Cellpose4Parameters params = Cellpose4Parameters.builder()
+				.computeFlows( true )
+				.randomizeLabels( true )
+				.build();
+
+		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose4( input, inputAxes, params, listener );
 
 		final RandomAccessibleInterval< UnsignedShortType > labels = output.labels;
 		final RandomAccessibleInterval< UnsignedByteType > flows = output.flows;
@@ -131,9 +168,10 @@ public class BasicUsage
 	{
 		// Demo preparation. We use IJ for this one.
 		ImageJ.main( args );
-		//final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
-		final ImagePlus imp = IJ.openImage( "../data_tests/041825_crop-small.tif" );
-		
+		// final ImagePlus imp = IJ.openImage(
+		// "http://imagej.net/images/blobs.gif" );
+		final ImagePlus imp = IJ.openImage( "samples/041825_crop-small.tif" );
+
 		imp.show();
 		final Img< T > img = ImageJFunctions.wrap( imp );
 
@@ -147,11 +185,11 @@ public class BasicUsage
 
 		// Specify the parameters for Cellpose 3
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
-		    .do3D( false )
-		    .stitchThreshold(0.)
-		    .computeFlows( false )
-		    .randomizeLabels(true)
-		    .build();
+				.do3D( false )
+				.stitchThreshold( 0. )
+				.computeFlows( false )
+				.randomizeLabels( true )
+				.build();
 
 		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );
 
@@ -159,7 +197,7 @@ public class BasicUsage
 
 		ImageJFunctions.show( labels ).setTitle( "Cellpose output" );
 	}
-	
+
 	public static void cellposeRunner( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		// Create fake images. Replace by your own images here.
@@ -192,23 +230,7 @@ public class BasicUsage
 		// try-with-resources block. This way we are sure that the shared tmp
 		// images are and the Cellpose runner are properly closed and cleaned up
 		// after use.
-		try (
-				// The tmp data location to pass input to Cellpose.
-				final ShmImg< UnsignedByteType > tmpInput = Cellpose.createInputShmImg( inputImages.get( 0 ) );
-				// The tmp data location to receive the Cellpose labels output.
-				final ShmImg< UnsignedShortType > tmpLabels = Cellpose.createOutputLabelsShmImg( tmpInput, axes, new UnsignedShortType() );
-				// The tmp data location to receive the Cellpose flows output.
-				final ShmImg< UnsignedByteType > tmpFlows = Cellpose.createOutputFlowsShmImg( tmpInput, axes );
-				// The Cellpose runner, initialized with the tmp data locations.
-				// Because we passed a Cellpose 3 parameter object, it will be a
-				// runner configured to run Cellpose 3.
-				final CellposeRunner< UnsignedByteType, UnsignedShortType > runner = Cellpose.cellposeRunner(
-						params,
-						ApposeTaskListener.VOID,
-						tmpInput,
-						axes,
-						tmpLabels,
-						tmpFlows ))
+		try (CellposeRunner< Cellpose3Parameters > runner = Cellpose.cellpose3Runner( ApposeTaskListener.VOID, params.torchVersion ))
 		{
 			System.out.println( String.format( "Runner and placeholders creation time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
 
@@ -227,21 +249,20 @@ public class BasicUsage
 
 				// Copy the input image to the tmp location.
 				startTime = System.currentTimeMillis();
-				ImgUtil.copy( input, tmpInput );
+				runner.setInput( input, axes, new UnsignedShortType() );
 				System.out.println( String.format( "Input copy time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
 
 				// Run Cellpose. The results will be written in the tmpLabels
 				// and tmpFlows images.
 				startTime = System.currentTimeMillis();
-				runner.run();
+				runner.run( params );
 				System.out.println( String.format( "Cellpose run time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
 
 				// Copy the output to a new image.
 				startTime = System.currentTimeMillis();
-				final RandomAccessibleInterval< UnsignedShortType > outputLabels = ArrayImgs.unsignedShorts( input.dimensionsAsLongArray() );
-				ImgUtil.copy( tmpLabels, outputLabels );
-				System.out.println( String.format( "Output copy to a new image time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
+				final Img< UnsignedShortType > outputLabels = runner.getOutputLabels();
 				outputImages.add( outputLabels );
+				System.out.println( String.format( "Output copy to a new image time: %.2f seconds", ( System.currentTimeMillis() - startTime ) / 1000. ) );
 			}
 
 			startTime = System.currentTimeMillis();

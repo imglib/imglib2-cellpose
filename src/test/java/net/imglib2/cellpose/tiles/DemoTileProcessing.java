@@ -51,14 +51,14 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
+import ij.gui.Overlay;
+import ij.gui.Roi;
 import ij.plugin.RGBStackMerge;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 import net.imglib2.Cursor;
-import net.imglib2.FinalDimensions;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.appose.ShmImg;
 import net.imglib2.appose.util.ApposeTaskListener;
 import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.cellpose.Cellpose;
@@ -72,7 +72,6 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.util.ImgUtil;
 import net.imglib2.view.fluent.RandomAccessibleIntervalView;
 
 public class DemoTileProcessing
@@ -100,6 +99,7 @@ public class DemoTileProcessing
 			merged.setC( 2 );
 			useGlasbeyDarkLUT( merged.getChannelProcessor() );
 			merged.setDisplayRange( 0, 250 );
+			merged.setOverlay( new Overlay() );
 
 			// Wait for the user to click OK before starting the processing.
 			IJ.showMessage( "Click OK to start Cellpose tile processing demo." );
@@ -119,7 +119,6 @@ public class DemoTileProcessing
 			final int overlap = 20;
 			final List< Interval > chunks = Grids.padWithOverlap( img, blockSize, overlap );
 			Collections.shuffle( chunks ); // Random order.
-			final FinalDimensions blockDims = new FinalDimensions( blockSize, blockSize );
 
 			// Label tile merger.
 			final double iouThresh = 0.1;
@@ -141,35 +140,32 @@ public class DemoTileProcessing
 				for ( final List< Interval > group : groups )
 				{
 					futures.add( executor.submit( () -> {
-						try (
-								// Placeholders for tile processing.
-								final ShmImg< T > cellposeInputData = Cellpose.createInputShmImg( blockDims, img.getType() );
-								final ShmImg< UnsignedShortType > cellposeOutputData = Cellpose.createOutputLabelsShmImg( blockDims, axisInfo, new UnsignedShortType() );
-								// The runner.
-								final CellposeRunner< T, UnsignedShortType > runner = Cellpose.cellposeRunner(
-										params,
-										ApposeTaskListener.VOID,
-										cellposeInputData,
-										axisInfo,
-										cellposeOutputData,
-										null );)
+
+						try (final CellposeRunner< Cellpose3Parameters > runner = Cellpose.cellpose3Runner( ApposeTaskListener.VOID, params.torchVersion ))
 						{
 							runner.init();
 
 							// Process the group of tiles.
 							for ( final Interval tileInterval : group )
 							{
+								final Roi tileRoi = new Roi( ( int ) tileInterval.min( 0 ), ( int ) tileInterval.min( 1 ), ( int ) tileInterval.dimension( 0 ), ( int ) tileInterval.dimension( 1 ) );
+								merged.getOverlay().add( tileRoi );
+								merged.updateAndDraw();
 
 								// Input tile -> Cellpose input data location.
-								copyInput( img, cellposeInputData, tileInterval );
+								// We use we send blockSize x blockSize even if
+								// the interval is smaller.
+								final RandomAccessibleIntervalView< T > tile = img.view().interval( tileInterval );
+								runner.setInput( tile, axisInfo );
 
 								// Run Cellpose.
-								runner.run();
-
+								runner.run( params );
+								final Img< UnsignedShortType > cellposeOutputData = runner.getOutputLabels();
 								// For display: separate closed label id
 								LabelShuffleUtil.shuffleLabelsInPlace( cellposeOutputData );
 
-								// Copy at most the size of the interval from the cellpose output data.
+								// Copy at most the size of the interval from
+								// the cellpose output data.
 								merger.addTile( cellposeOutputData, tileInterval );
 
 								// Cellpose output tile -> output ImagePlus.
@@ -243,33 +239,6 @@ public class DemoTileProcessing
 		}
 	}
 
-	/**
-	 * Copy the data of the input image contained in the tile interval to the
-	 * Cellpose input ShmImg. The Cellpose image is supposed to be at origin (0,
-	 * 0) and of size equal to the tile size. The input image must be defined
-	 * over all the tile interval.
-	 * 
-	 * @param <T>
-	 *            the pixel type
-	 * @param input
-	 *            the input image
-	 * @param target
-	 *            the Cellpose input ShmImg
-	 * @param interval
-	 *            the tile interval
-	 */
-	private static < T extends RealType< T > & NativeType< T > > void copyInput( final Img< T > input, final ShmImg< T > target, final Interval interval )
-	{
-		final RandomAccessibleIntervalView< T > viewInput = input.view()
-				.interval( interval )
-				.zeroMin();
-		final RandomAccessibleIntervalView< T > viewInputShmImg = target.view()
-				.translate( interval.minAsLongArray() )
-				.interval( interval )
-				.zeroMin();
-		ImgUtil.copy( viewInput, viewInputShmImg );
-	}
-
 	private static LUT loadLutFromResource( final String resourcePath )
 	{
 		try (InputStream is = DemoTileProcessing.class.getResourceAsStream( resourcePath );
@@ -330,5 +299,4 @@ public class DemoTileProcessing
 	{
 		ip.setLut( lut );
 	}
-
 }

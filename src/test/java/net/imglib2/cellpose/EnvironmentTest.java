@@ -39,96 +39,62 @@ import org.apposed.appose.TaskException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import net.imglib2.appose.ShmImg;
 import net.imglib2.appose.util.ApposeTaskListener;
 import net.imglib2.appose.util.AxisInfo;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.img.array.ArrayImgs;
 
 /**
- * JUnit tests that check that the appose environment are correctly installed/activated.
+ * JUnit tests that check that the appose environment are correctly
+ * installed/activated.
  */
-public class EnvironmentTest 
+public class EnvironmentTest
 {
-	
-	@Test 
+
+	@Test
 	public void createEnvironmentCP3()
 	{
-		final int[] dims = new int[] { 300, 300 };
-		try {
-			final ShmImg<UnsignedByteType> shimg = new ShmImg<>( new UnsignedByteType(), dims );
-			final ShmImg<UnsignedByteType> shout = new ShmImg<>( new UnsignedByteType(), dims );
-			
-		
+		try
+		{
 			final Cellpose3Parameters params = Cellpose3Parameters.builder()
-				.model( Cellpose3BuiltinModels.CYTO2 )
-				.computeFlows( true )
-				.channels( 0, 0 )
-				.build();
-			final String envName = "cp3-cpu";
-			final String pythonScriptPath = "cp3.py";
-			final String pythonInitScriptPath = "cp3_init.py";
-		
-			final CellposeRunner<UnsignedByteType, UnsignedByteType> cprun = new CellposeRunner<>(
-					params,
-					pythonInitScriptPath,
-					pythonScriptPath,
-					envName,
-					ApposeTaskListener.STD,
-					shimg,
-					AxisInfo.XY,
-					shout,
-					null );
-			
-				cprun.init();
-				cprun.close();
-			
+					.model( Cellpose3BuiltinModels.CYTO2 )
+					.computeFlows( true )
+					.channels( 0, 0 )
+					.build();
+			final CellposeRunner< Cellpose3Parameters > cprun = Cellpose.cellpose3Runner( ApposeTaskListener.VOID, params.torchVersion );
+			cprun.init();
+			cprun.setInput( ArrayImgs.unsignedBytes( 128, 128 ), AxisInfo.XY );
+			cprun.run( params );
+			cprun.close();
 		}
 		catch ( BuildException | IOException | InterruptedException | TaskException e )
 		{
-			Assert.fail("Got an exception when installing environment CP3: "+e);
+			Assert.fail( "Got an exception when installing environment CP3: " + e );
 			e.printStackTrace();
 		}
-	
+
 	}
 
-	@Test 
+	@Test
 	public void createEnvironmentCP4()
 	{
-		final int[] dims = new int[] { 300, 300 };
-		try {
-			final ShmImg<UnsignedByteType> shimg = new ShmImg<>( new UnsignedByteType(), dims );
-			final ShmImg<UnsignedByteType> shout = new ShmImg<>( new UnsignedByteType(), dims );
-			
-		
+		try
+		{
 			final Cellpose4Parameters params = Cellpose4Parameters.builder()
-				.model( Cellpose4BuiltinModels.CPSAM )
-				.computeFlows( false )
-				.build();
-			final String envName = "cp4-cpu";
-			final String pythonScriptPath = "cp4.py";
-			final String pythonInitScriptPath = "cp4_init.py";
-		
-			final CellposeRunner<UnsignedByteType, UnsignedByteType> cprun = new CellposeRunner<>(
-					params,
-					pythonInitScriptPath,
-					pythonScriptPath,
-					envName,
-					ApposeTaskListener.STD,
-					shimg,
-					AxisInfo.XY,
-					shout,
-					null );
-			
-				cprun.init();
-				cprun.close();
-			
+					.model( Cellpose4BuiltinModels.CPSAM )
+					.computeFlows( false )
+					.build();
+			final CellposeRunner< Cellpose4Parameters > cprun = Cellpose.cellpose4Runner( ApposeTaskListener.VOID, params.torchVersion );
+			cprun.init();
+			cprun.setInput( ArrayImgs.unsignedBytes( 128, 128 ), AxisInfo.XY );
+			cprun.run( params );
+			cprun.close();
 		}
 		catch ( BuildException | IOException | InterruptedException | TaskException e )
 		{
-			Assert.fail("Got an exception when installing environment CP4: "+e);
+			Assert.fail( "Got an exception when installing environment CP4: " + e );
 			e.printStackTrace();
 		}
-	
+
 	}
 
 }

@@ -34,12 +34,7 @@ package net.imglib2.cellpose;
 
 import java.util.Map;
 
-import net.imglib2.appose.ShmImg;
 import net.imglib2.appose.util.AxisInfo;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public class Cellpose4Parameters extends CellposeParameters
 {
@@ -88,19 +83,13 @@ public class Cellpose4Parameters extends CellposeParameters
 	}
 
 	@Override
-	public < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > Map< String, Object > toApposeMap(
-			final ShmImg< T > input,
-			final AxisInfo axisInfo,
-			final ShmImg< R > outputLabels,
-			final ShmImg< UnsignedByteType > outputFlows )
+	public Map< String, Object > toApposeMap( final AxisInfo axisInfo )
 	{
 		
-		final Map< String, Object > inputs = super.toApposeMap( input, axisInfo, outputLabels, outputFlows );
+		final Map< String, Object > inputs = super.toApposeMap( axisInfo );
 		final boolean isBuiltInModel = customModel == null || customModel.equals( "" );
 		inputs.put( "model_name", isBuiltInModel ? buitInModel.modelName() : null );
 
-		final long nChannels = axisInfo.nChannels( input );
-		inputs.put( "n_channels", nChannels );
 		inputs.put( "chan0", chan0 );
 		inputs.put( "chan1", chan1 );
 		inputs.put( "chan2", chan2 );

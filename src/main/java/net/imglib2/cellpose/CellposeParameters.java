@@ -35,12 +35,7 @@ package net.imglib2.cellpose;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.imglib2.appose.ShmImg;
 import net.imglib2.appose.util.AxisInfo;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 public abstract class CellposeParameters
 {
@@ -146,25 +141,16 @@ public abstract class CellposeParameters
 	 *            the input image.
 	 * @return a new map.
 	 */
-	public < T extends RealType< T > & NativeType< T >, R extends IntegerType< R > & NativeType< R > > Map< String, Object > toApposeMap(
-			final ShmImg< T > input,
-			final AxisInfo axisInfo,
-			final ShmImg< R > outputLabels,
-			final ShmImg< UnsignedByteType > outputFlows )
+	public Map< String, Object > toApposeMap( final AxisInfo axisInfo )
 	{
 		final Map< String, Object > inputs = new HashMap<>();
 
-		// Inputs
-		inputs.put( "input", input.ndArray() );
+		// Input shape.
 		final AxisInfo axisInfoPython = axisInfo.toPython();
 		inputs.put( "t_axis", axisInfoPython.T() < 0 ? null : axisInfoPython.T() );
 		inputs.put( "z_axis", axisInfoPython.Z() < 0 ? null : axisInfoPython.Z() );
 		inputs.put( "channel_axis", axisInfoPython.C() < 0 ? null : axisInfoPython.C() );
 		
-		// Outputs
-		inputs.put( "output_labels", outputLabels.ndArray() );
-		inputs.put( "output_flows", outputFlows == null ? null : outputFlows.ndArray() );
-
 		// Other params.
 		inputs.put( "use_3D", do3D );
 		// return null if custom model
