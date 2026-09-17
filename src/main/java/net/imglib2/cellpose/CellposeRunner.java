@@ -47,6 +47,8 @@ import org.apposed.appose.Service.TaskStatus;
 import org.apposed.appose.TaskException;
 
 import net.imglib2.appose.ShmImg;
+import net.imglib2.appose.util.ApposeTaskListener;
+import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;

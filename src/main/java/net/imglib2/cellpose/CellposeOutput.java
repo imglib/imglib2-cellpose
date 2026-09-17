@@ -33,6 +33,7 @@
 package net.imglib2.cellpose;
 
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;

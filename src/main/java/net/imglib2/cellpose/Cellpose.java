@@ -32,8 +32,8 @@
  */
 package net.imglib2.cellpose;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 import org.apposed.appose.BuildException;
 import org.apposed.appose.TaskException;
@@ -42,6 +42,8 @@ import net.imglib2.Dimensions;
 import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.appose.ShmImg;
+import net.imglib2.appose.util.ApposeTaskListener;
+import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;

@@ -40,6 +40,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.imglib2.appose.ShmImg;
+import net.imglib2.appose.util.ApposeTaskListener;
+import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 /**

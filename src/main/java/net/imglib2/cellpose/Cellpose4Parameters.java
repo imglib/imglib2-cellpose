@@ -35,6 +35,7 @@ package net.imglib2.cellpose;
 import java.util.Map;
 
 import net.imglib2.appose.ShmImg;
+import net.imglib2.appose.util.AxisInfo;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
