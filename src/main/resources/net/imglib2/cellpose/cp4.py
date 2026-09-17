@@ -83,6 +83,7 @@ def run_cellpose_v4(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     stitch_threshold=kwargs.get('stitch_threshold', 0.)
     do_3D=kwargs.get('use_3D', False)
     label_unicity = kwargs.get('label_unicity', None)
+    randomize_labels = kwargs.get('randomize_labels', False)
 
     task.update(message=f"Received image with shape {img.shape} and parameters: channel_axis={channel_axis}, z_axis={z_axis}, time_axis={time_axis}, stitch_threshold={stitch_threshold}, use_3D={do_3D}")
 
@@ -147,14 +148,12 @@ def run_cellpose_v4(img: np.ndarray, kwargs: dict) -> tuple[np.ndarray, np.ndarr
     ## force label_unicity if necessary
     if label_unicity:
         task.update(message=f"Ensuring label unicity accross slices/frames..")
-        masks = np.asarray(masks)
-        nz = masks.shape[0]
-        max_per_z = masks.reshape(nz, -1).max(axis=1)
-        ## Calculate the offsets for each slice
-        offsets = np.concatenate(([0], np.cumsum(max_per_z)[:-1]))
-        offsets = offsets.reshape((nz,) + (1,) * (masks.ndim - 1))
-        ## Offset only positive pixels (labels) 
-        masks = np.where(masks > 0, masks + offsets, masks)
+        masks = unique_labels(masks)
+
+    ## randomize the labels if asked
+    if randomize_labels:
+        task.update(message=f"Shuffle the labels distribution..")
+        masks = shuffle_labels(masks)
     return masks, flows, styles
 
 
@@ -172,7 +171,7 @@ if appose_mode:
     from appose.python_worker import Task
     task = globals()['task']
 else:
-    from cp_utils import get_torch_device
+    from cp_utils import get_torch_device, unique_labels, shuffle_labels
     from appose.python_worker import Task
     task = Task()
 
@@ -200,6 +199,7 @@ if appose_mode:
     n_channels: int = globals()['n_channels']    
     use_gpu: bool = globals()['use_gpu']
     label_unicity: bool | None = globals()['label_unicity']
+    randomize_labels: bool = globals()['randomize_labels']
 
     
     input_image = fiji_image.ndarray()  # pylint: disable=E1120
@@ -247,6 +247,7 @@ else:
     flow3D_smooth = 0
     use_gpu = False
     label_unicity = None
+    randomize_labels = False
 
 
 use_gpu, device = get_torch_device(use_gpu)
@@ -277,6 +278,7 @@ masks, flows, styles = run_cellpose_v4(
         'niter': niter,
         'tile_overlap': tile_overlap,
         'label_unicity': label_unicity,
+        'randomize_labels': randomize_labels,
     }
 )
 

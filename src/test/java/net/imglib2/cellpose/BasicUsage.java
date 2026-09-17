@@ -60,8 +60,8 @@ public class BasicUsage
 
 	public static void main( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		basicUsage( args );
-		//stitchThreshold( args );
+		//basicUsage( args );
+		stitchThreshold( args );
 //		outputType( args );
 //		cellposeRunner( args );
 	}
@@ -114,6 +114,7 @@ public class BasicUsage
 		    .model( Cellpose3BuiltinModels.CYTO2 )
 		    .channels( 1, 0 )
 		    .computeFlows( true )
+		    .randomizeLabels(true)
 		    .build();
 
 		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );
@@ -129,8 +130,8 @@ public class BasicUsage
 	{
 		// Demo preparation. We use IJ for this one.
 		ImageJ.main( args );
-		final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
-		//final ImagePlus imp = IJ.openImage( "../data_tests/041825_crop-small.tif" );
+		//final ImagePlus imp = IJ.openImage( "http://imagej.net/images/blobs.gif" );
+		final ImagePlus imp = IJ.openImage( "../data_tests/041825_crop-small.tif" );
 		
 		imp.show();
 		final Img< T > img = ImageJFunctions.wrap( imp );
@@ -148,6 +149,7 @@ public class BasicUsage
 		    .do3D( false )
 		    .stitchThreshold(0.)
 		    .computeFlows( false )
+		    .randomizeLabels(true)
 		    .build();
 
 		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );

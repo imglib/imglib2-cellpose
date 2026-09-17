@@ -33,8 +33,6 @@
 
 # These imports are required for Appose calls to work on Windows platforms.
 import numpy as np
-from cellpose import models
-
 import torch
 
 def get_torch_device(use_gpu: bool) -> tuple[bool, torch.device]:
@@ -51,3 +49,28 @@ def get_torch_device(use_gpu: bool) -> tuple[bool, torch.device]:
     return False, torch.device("cpu")
 
 # %%
+def unique_labels(masks):
+    """ Ensure that labels are unique in each slice """
+    masks = np.asarray(masks)
+    nz = masks.shape[0]
+    max_per_z = masks.reshape(nz, -1).max(axis=1).astype(masks.dtype, copy=False)
+    ## Calculate the offsets for each slice
+    offsets = np.concatenate(([0], np.cumsum(max_per_z, dtype=masks.dtype)[:-1]))
+    offsets = offsets.reshape((nz,) + (1,) * (masks.ndim - 1))
+    ## Offset only positive pixels (labels) 
+    masks = np.where(masks > 0, masks + offsets, masks)
+    return masks
+
+def shuffle_labels(masks):
+    """ Randomize the position of the labels so close value are not necessarily close """
+    masks = np.asarray(masks)
+    labels = np.unique(masks)
+    labels = labels[labels!=0]  ## remove 0
+    
+    shuffled_labels = np.random.permutation(labels)
+    max_label = labels.max()
+    indexes = np.zeros(max_label + 1, dtype=masks.dtype)
+    indexes[labels] = shuffled_labels
+    rand_masks = indexes[masks]
+    
+    return rand_masks
