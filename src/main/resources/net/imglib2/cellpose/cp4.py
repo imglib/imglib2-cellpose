@@ -196,7 +196,6 @@ if appose_mode:
     niter: int | None = globals()['niter']
     tile_overlap: float = globals()['tile_overlap']
     flow3D_smooth: float = globals()['flow3D_smooth']
-    n_channels: int = globals()['n_channels']    
     use_gpu: bool = globals()['use_gpu']
     label_unicity: bool | None = globals()['label_unicity']
     randomize_labels: bool = globals()['randomize_labels']
