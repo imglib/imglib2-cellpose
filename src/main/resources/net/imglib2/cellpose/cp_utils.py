@@ -65,6 +65,8 @@ def shuffle_labels(masks):
     """ Randomize the position of the labels so close value are not necessarily close """
     masks = np.asarray(masks)
     labels = np.unique(masks)
+    if len(labels) <= 1:
+        return masks
     labels = labels[labels!=0]  ## remove 0
     
     shuffled_labels = np.random.permutation(labels)
