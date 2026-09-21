@@ -122,6 +122,7 @@ public class BasicUsage
 				.channels( 1, 0 )
 				.computeFlows( true )
 				.randomizeLabels( true )
+				.ensureLabelUnicity( true )
 				.build();
 
 		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );
