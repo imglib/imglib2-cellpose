@@ -352,6 +352,26 @@ public abstract class CellposeParameters
 			return ( B ) this;
 		}
 
+		/**
+		 * To force label unicity (or not) accross slices or frames. If
+		 * <code>null</code>, python script decides: unicity only if 2D+stitch
+		 * and stitch=0
+		 *
+		 * @param labelUnicity
+		 *            if <code>true</code>, labels will be unique accross slices
+		 *            and frames. If <code>false</code>, labels will be unique
+		 *            only within each slice or frame. If <code>null</code>,
+		 *            python script decides: unicity only if 2D+stitch and
+		 *            stitch=0
+		 * @return this builder
+		 */
+		@SuppressWarnings( "unchecked" )
+		public B labelUnicity( final Boolean labelUnicity )
+		{
+			this.labelUnicity = labelUnicity;
+			return ( B ) this;
+		}
+
 		public abstract CellposeParameters build();
 	}
 }
