@@ -287,14 +287,7 @@ public abstract class CellposeParameters
 			this.useGpu = useGpu;
 			return ( B ) this;
 		}
-		
-		@SuppressWarnings( "unchecked" )
-		public B labelUnicity( final boolean labelUnicity )
-		{
-			this.labelUnicity  = labelUnicity;
-			return ( B ) this;
-		}
-		
+
 		@SuppressWarnings( "unchecked" )
 		public B randomizeLabels( final boolean randomizeLabels )
 		{
