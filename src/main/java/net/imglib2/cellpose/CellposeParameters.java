@@ -146,12 +146,14 @@ public abstract class CellposeParameters
 	/**
 	 * Returns the most suited output types for the label image
 	 */
-	public <R extends IntegerType<R> & NativeType<R>> R labelOutputType()
+	public <R extends NativeType<R>&IntegerType<R>> R labelOutputType()
 	{
 		if ( labelOutputSize.equals("32-bit") )
+			//return "UnsignedIntType";
 			return ((R) new UnsignedIntType());
 		// by default 16-bit size
-		return ((R) new UnsignedShortType());
+		//return "UnsignedShortType";
+		return (R) new UnsignedShortType();
 	}
 
 	/**

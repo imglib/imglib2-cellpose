@@ -32,8 +32,6 @@
  */
 package net.imglib2.cellpose;
 
-import static fiji.plugin.appose.ApposeUtils.rawWraps;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,6 +44,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import net.imagej.ImgPlus;
+import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.appose.ShmImg;
 import net.imglib2.img.Img;
@@ -57,6 +56,7 @@ import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.util.ImgUtil;
+
 
 public class BasicUsage
 {
@@ -95,6 +95,17 @@ public class BasicUsage
 		
 		@SuppressWarnings( "unused" )
 		final RandomAccessibleInterval< UnsignedShortType > labels = outputs.labels;
+		int maxVal = 0; 
+		Cursor<UnsignedShortType> cursor = labels.cursor();
+		while (cursor.hasNext()) {
+		    cursor.fwd();
+		    int currentValue = cursor.get().get();
+
+		    if (currentValue > maxVal) {
+		        maxVal = currentValue;
+		    }
+		}
+		System.out.println("Maximum label: " + maxVal);
 		
 		final Cellpose3Parameters params32 = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
@@ -110,10 +121,21 @@ public class BasicUsage
 				.build();
 
 		// test 32-bit output type
-		final CellposeOutput< UnsignedIntType > outputs32 = net.imglib2.cellpose.Cellpose.cellpose3( input, inputAxes, params, listener );
+		final CellposeOutput< UnsignedIntType > outputs32 = net.imglib2.cellpose.Cellpose.cellpose3( input, inputAxes, params32, listener );
 		
 		@SuppressWarnings( "unused" )
 		final RandomAccessibleInterval< UnsignedIntType > labels32 = outputs32.labels;
+		long maxVal32 = 0; 
+		Cursor<UnsignedIntType> cursor32 = labels32.cursor();
+		while (cursor32.hasNext()) {
+		    cursor32.fwd();
+		    long currentValue = cursor32.get().get();
+
+		    if (currentValue > maxVal32) {
+		        maxVal32 = currentValue;
+		    }
+		}
+		System.out.println("Maximum label: " + maxVal32);
 	}
 	
 
@@ -129,12 +151,12 @@ public class BasicUsage
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.channels( 1, 0 )
 				.computeFlows( true )
+				.labelOutputSize("32-bit")
 				.build();
 
 		final CellposeOutput< UnsignedIntType > output = Cellpose.cellpose3(
 				input,
 				inputAxes,
-				new UnsignedIntType(),
 				params,
 				listener );
 
