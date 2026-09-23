@@ -380,13 +380,13 @@ public class Cellpose
 	 * @throws TaskException
 	 *             if executing the Python script fails.
 	 */
-	public static < T extends RealType< T > & NativeType< T > > CellposeOutput< UnsignedShortType > cellpose3(
+	public static < T extends RealType< T > & NativeType< T >, R extends IntegerType<R>&NativeType<R> >  CellposeOutput<R> cellpose3(
 			final RandomAccessibleInterval< T > img,
 			final AxisInfo axisInfo,
 			final Cellpose3Parameters params,
 			final ApposeTaskListener listener ) throws BuildException, IOException, InterruptedException, TaskException
 	{
-		return cellpose3( img, axisInfo, new UnsignedShortType(), params, listener );
+		return cellpose3( img, axisInfo, (R)params.labelOutputType(), params, listener );
 	}
 
 	/**

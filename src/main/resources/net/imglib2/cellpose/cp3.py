@@ -268,6 +268,7 @@ if compute_flows:
 
 if appose_mode:
     # Write masks into the shared output image.
+    task.update(f"CP3: output label type: {masks.dtype}")
     output_labels[:] = masks
     if compute_flows:
         output_flows[:] = flows

@@ -40,6 +40,8 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
 
 public abstract class CellposeParameters
 {
@@ -88,11 +90,15 @@ public abstract class CellposeParameters
 
 	public final String torchVersion;
 	
+	// Labels option: unicity, randomization and size 16-bit or 32-bit
+	
 	// To force label unicity (or not) accross slices or frames. If null, python script decides: unicity only if 2D+stitch and stitch=0
 	public final Boolean labelUnicity;
 	
 	// To randomize the labels distribution after cellpose run (in the python script)
 	public final boolean randomizeLabels;
+	
+	public final String labelOutputSize;
 	
 	protected CellposeParameters(
 			final String customModel,
@@ -112,7 +118,8 @@ public abstract class CellposeParameters
 			final int nIter,
 			final String torchVersion,
 			final Boolean labelUnicity,
-			final boolean randomizeLabels
+			final boolean randomizeLabels,
+			final String labelOutputSize
 			)
 	{
 		this.customModel = customModel;
@@ -133,6 +140,18 @@ public abstract class CellposeParameters
 		this.torchVersion = torchVersion;
 		this.labelUnicity = labelUnicity;
 		this.randomizeLabels = randomizeLabels;
+		this.labelOutputSize = labelOutputSize;
+	}
+	
+	/**
+	 * Returns the most suited output types for the label image
+	 */
+	public <R extends IntegerType<R> & NativeType<R>> R labelOutputType()
+	{
+		if ( labelOutputSize.equals("32-bit") )
+			return ((R) new UnsignedIntType());
+		// by default 16-bit size
+		return ((R) new UnsignedShortType());
 	}
 
 	/**
@@ -238,6 +257,8 @@ public abstract class CellposeParameters
 		protected Boolean labelUnicity = null; // when null, nothing is imposed to python. True or false to impose unicity or not
 
 		protected boolean randomizeLabels = false;
+		
+		protected String labelOutputSize = "16-bit";
 		
 		@SuppressWarnings( "unchecked" )
 		public B customModel( final String customModel )
@@ -357,6 +378,14 @@ public abstract class CellposeParameters
 			this.torchVersion = torchVersion;
 			return ( B ) this;
 		}
+		
+		@SuppressWarnings( "unchecked" )
+		public B labelOutputSize( final String lblOutputSize )
+		{
+			this.labelOutputSize = lblOutputSize;
+			return ( B ) this;
+		}
+		
 
 		/**
 		 * To force label unicity (or not) accross slices or frames. If

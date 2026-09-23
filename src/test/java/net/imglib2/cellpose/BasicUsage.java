@@ -32,6 +32,8 @@
  */
 package net.imglib2.cellpose;
 
+import static fiji.plugin.appose.ApposeUtils.rawWraps;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,6 +45,7 @@ import org.apposed.appose.TaskException;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.appose.ShmImg;
 import net.imglib2.img.Img;
@@ -61,10 +64,58 @@ public class BasicUsage
 	public static void main( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
 		//basicUsage( args );
-		stitchThreshold( args );
+		//stitchThreshold( args );
 //		outputType( args );
 //		cellposeRunner( args );
+		labelOutputType( args );
 	}
+	
+	public static < T extends RealType< T > & NativeType< T > > void labelOutputType( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
+	{
+		final ImagePlus imp = IJ.openImage( "../data_tests/lotsmalldots.tif" );
+		final Img< T > img = ImageJFunctions.wrap( imp );
+
+		final RandomAccessibleInterval< T > input = img;
+		final AxisInfo inputAxes = AxisInfo.XY;
+		final ApposeTaskListener listener = ApposeTaskListener.STD;
+		final Cellpose3Parameters params = Cellpose3Parameters.builder()
+				.model( Cellpose3BuiltinModels.CYTO2 )
+				.channels( 1, 0 )
+				.diameter(6)
+				.cellProbThreshold(-6.0)
+				.flowThreshold(1)
+				.minSize(2)
+				.computeFlows( false )
+				.torchVersion("cu130")
+				.randomizeLabels(false)
+				.build();
+
+		// test 32-bit output type
+		final CellposeOutput< UnsignedShortType > outputs = net.imglib2.cellpose.Cellpose.cellpose3( input, inputAxes, params, listener );
+		
+		@SuppressWarnings( "unused" )
+		final RandomAccessibleInterval< UnsignedShortType > labels = outputs.labels;
+		
+		final Cellpose3Parameters params32 = Cellpose3Parameters.builder()
+				.model( Cellpose3BuiltinModels.CYTO2 )
+				.channels( 1, 0 )
+				.diameter(6)
+				.cellProbThreshold(-6.0)
+				.flowThreshold(1)
+				.minSize(2)
+				.computeFlows( false )
+				.labelOutputSize("32-bit")
+				.randomizeLabels(false)
+				.torchVersion("cu130")
+				.build();
+
+		// test 32-bit output type
+		final CellposeOutput< UnsignedIntType > outputs32 = net.imglib2.cellpose.Cellpose.cellpose3( input, inputAxes, params, listener );
+		
+		@SuppressWarnings( "unused" )
+		final RandomAccessibleInterval< UnsignedIntType > labels32 = outputs32.labels;
+	}
+	
 
 	public static < T extends RealType< T > & NativeType< T > > void outputType( final String[] args ) throws BuildException, IOException, InterruptedException, TaskException
 	{
