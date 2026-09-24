@@ -30,9 +30,7 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # #L%
 ###
-import numpy as np
-from cellpose import models, io
-from typing import TYPE_CHECKING
+
 
 ###############################################################################
 # AUXILIARY FUNCTIONS

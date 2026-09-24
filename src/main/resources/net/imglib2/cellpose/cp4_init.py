@@ -30,8 +30,6 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # #L%
 ###
-from cellpose import models
-from typing import TYPE_CHECKING
 
 appose_mode = 'task' in globals()
 if appose_mode:
