@@ -123,9 +123,19 @@ public class BasicUsage
 				.computeFlows( true )
 				.randomizeLabels( true )
 				.labelUnicity( true )
+				.stitchThreshold( 0.5 )
 				.build();
-
 		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose3( input, inputAxes, params, listener );
+
+		// Specify the parameters for Cellpose SAM
+//		final Cellpose4Parameters params = Cellpose4Parameters.builder()
+//				.computeFlows( true )
+//				.randomizeLabels( true )
+//				.labelUnicity( true )
+//				.stitchThreshold( 0.5 )
+//				.build();
+//		final CellposeOutput< UnsignedShortType > output = Cellpose.cellpose4( input, inputAxes, params, listener );
+
 
 		final RandomAccessibleInterval< UnsignedShortType > labels = output.labels;
 		final RandomAccessibleInterval< UnsignedByteType > flows = output.flows;
