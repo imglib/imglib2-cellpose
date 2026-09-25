@@ -110,11 +110,15 @@ def run_cellpose_v4(
         message=f"Received image with shape {img.shape} and parameters: channel_axis={channel_axis}, z_axis={z_axis}, time_axis={time_axis}, stitch_threshold={stitch_threshold}, use_3D={do_3D}"
     )
 
+    if z_axis is None:
+        # See below.
+        # Also, if we don't set stitch_threshold to 0. for 2D images, Cellpose will crash.
+        stitch_threshold = 0.0
+        do_3D = False
+
     # Cellpose 4 madness to get batch processing for 2D+T or 2D+C+T images
     if time_axis is not None and z_axis is None:
         # Cellpose 2D batch mode: process each T frame independently, no stitching.
-        stitch_threshold = 0.0
-        do_3D = False
         # convert_image only handles channel_axis for ndim==3 (one batch+spatial+channel).
         # For 4D [T, C, Y, X] we must reorder to [T, Y, X, C] so Cellpose's ndim==4 path
         # (which expects channels-last) takes over without needing channel_axis.

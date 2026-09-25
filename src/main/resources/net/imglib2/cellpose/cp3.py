@@ -114,11 +114,15 @@ def run_cellpose_v3(
     label_unicity = kwargs.get("label_unicity", None)
     randomize_labels = kwargs.get("randomize_labels", False)
 
+    if z_axis is None:
+        # See below.
+        # Also, if we don't set stitch_threshold to 0. for 2D images, Cellpose will crash.
+        stitch_threshold = 0.0  # force no stitching
+        do_3D = False  # force 2D processing
+
     if time_axis is not None and z_axis is None:
         # The only way to process T axis in batch is to fake it as a Z-axis and prevent stitching.
         z_axis = time_axis
-        stitch_threshold = 0.0  # force no stitching
-        do_3D = False  # force 2D processing
 
     # Force label unicity accross slices if 2D+stitch and stitch_threshold is 0, except if label_unicity is already set to False
     if not do_3D and z_axis is not None and stitch_threshold == 0.0:
