@@ -34,6 +34,10 @@
 # These imports are required for Appose calls to work on Windows platforms.
 import numpy as np
 import torch
+from cellpose import models, io
+from typing import TYPE_CHECKING
+import time
+
 
 
 def get_torch_device(use_gpu: bool) -> tuple[bool, torch.device]:
