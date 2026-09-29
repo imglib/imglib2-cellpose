@@ -18,7 +18,7 @@ cmake = "*"
 llvmlite = "*"
 
 [pypi-dependencies]
-appose = ">=0.10.1, <0.12"
+appose = ">=0.10.1, <0.13"
 
 # --- PyTorch features ---
 # See for more details on torch versions and CUDA support: https://pytorch.org/get-started/previous-versions/

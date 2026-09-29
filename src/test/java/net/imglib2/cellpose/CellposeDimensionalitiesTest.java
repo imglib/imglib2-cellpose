@@ -63,7 +63,8 @@ public class CellposeDimensionalitiesTest
 	@Test
 	public void testCellpose3_XY()
 	{
-		skipIfTestThresholdLessThan( 6 );
+		// Always do this test whatever the threshold
+		//skipIfTestThresholdLessThan( 5 );
 		final Cellpose3Parameters params = Cellpose3Parameters.builder()
 				.model( Cellpose3BuiltinModels.CYTO2 )
 				.channels( 1, 0 )
