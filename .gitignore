@@ -23,6 +23,7 @@
 /.classpath
 /.project
 /.settings/
+/.factorypath
 /target/
 /.idea/
 
